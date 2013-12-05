@@ -1,0 +1,53 @@
+class UserInterface
+
+  def login
+    puts "Input your email:"
+    email = gets.chomp
+    @user = User.find_by_email(email)
+  end
+
+  def prompt
+    puts "What do you want to do?"
+    puts "0. Create shortened URL"
+    puts "1. Visit shortened URL"
+    gets[0]
+  end
+
+  def create_url
+    puts "Type in your long url:"
+    url = gets.chomp
+    s = ShortenedUrl.create_for_user_and_long_url!(@user, url)
+    puts "Short url is: #{s.short_url}"
+  end
+
+  def visit_url
+    puts "Type in your short url: "
+    url = gets.chomp
+    s = ShortenedUrl.find_by_short_url(url)
+    Launchy.open(s.long_url)
+    Visit.record_visit!(@user, s)
+  end
+
+  def run
+    login
+    begin
+      p = prompt
+      if p == '0'
+        create_url
+      elsif p == '1'
+        visit_url
+      else
+        raise InvalidInputError, "Invalid input"
+      end
+    rescue InvalidInputError => e
+      puts e.message
+      retry
+    end
+
+  end
+end
+
+class InvalidInputError < StandardError
+end
+
+UserInterface.new.run

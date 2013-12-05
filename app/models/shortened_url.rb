@@ -32,7 +32,8 @@ class ShortenedUrl < ActiveRecord::Base
       :short_url => short_url,
       :long_url => long_url,
       :submitter_id => user.id
-      }).save!
+      })
+    shortened.save!
     shortened
   end
 

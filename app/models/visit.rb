@@ -20,7 +20,8 @@ class Visit < ActiveRecord::Base
     visit = Visit.new({
       :user_id => user.id,
       :shortened_url_id => shortened_url.id
-    }).save!
+    })
+    visit.save!
     visit
   end
 end
