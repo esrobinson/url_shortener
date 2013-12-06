@@ -1,6 +1,9 @@
 class User < ActiveRecord::Base
   validates :email, :presence => true, :uniqueness => true
-  attr_accessible :email
+  validates :password, :presence => true, :on => :create
+
+  has_secure_password
+  attr_accessible :email, :password, :password_confirmation
 
   has_many(
     :submitted_urls,

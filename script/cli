@@ -1,9 +1,20 @@
 class UserInterface
 
   def login
-    puts "Input your email:"
-    email = gets.chomp
-    @user = User.find_by_email(email)
+    while true
+      puts "Input your email:"
+      email = gets.chomp
+      puts "Input your password:"
+      password = gets.chomp
+      user = User.find_by_email(email)
+
+      if user && user.authenticate(password)
+        @user = user
+        break
+      end
+
+      puts "Invalid login."
+    end
   end
 
   def prompt
