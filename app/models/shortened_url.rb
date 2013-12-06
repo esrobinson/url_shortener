@@ -3,6 +3,8 @@ class ShortenedUrl < ActiveRecord::Base
 
   validates :short_url, :presence => true, :uniqueness => true
   validates :submitter_id, :presence => true
+  validates :long_url, :presence => true, :length => { :maximum => 255 }
+  validate :rate_limiter
 
   belongs_to(
     :submitter,
@@ -18,7 +20,16 @@ class ShortenedUrl < ActiveRecord::Base
     :primary_key => :id
   )
 
+  has_many(
+    :taggings,
+    :class_name => "Tagging",
+    :foreign_key => :shortened_url_id,
+    :primary_key => :id
+  )
+
   has_many(:visitors, :through => :visits, :source => :user, :uniq => true)
+
+  has_many(:tags, :through => :taggings, :source => :tag_topic)
 
   def self.random_code
     random_code = SecureRandom::urlsafe_base64
@@ -48,4 +59,15 @@ class ShortenedUrl < ActiveRecord::Base
   def num_recent_uniques
     self.visits.where("created_at >= ?", 10.minutes.ago)
   end
+
+  private
+
+  def rate_limiter
+    user = User.find(submitter_id)
+
+    if user.submitted_urls.where("created_at >= ?", 1.minute.ago).count >= 5
+      errors[:user] << 'has submitted too many times in last minute.'
+    end
+  end
+
 end
